@@ -3,11 +3,19 @@ import pandas as pd
 from google.cloud import bigquery
 import plotly.express as px
 
-# חיבור ל-BigQuery
-KEY_FILE = "clinical-trials-project-495405-ef2da931c162.json"
-client = bigquery.Client.from_service_account_json(KEY_FILE)
-
-st.set_page_config(page_title="Clinical Trials Dashboard", layout="wide")
+# --- חיבור ל-BigQuery (מותאם גם לענן וגם למחשב האישי) ---
+try:
+    if "gcp_service_account" in st.secrets:
+        # אם אנחנו בענן של סטרימליט
+        info = dict(st.secrets["gcp_service_account"])
+        client = bigquery.Client.from_service_account_info(info)
+    else:
+        # מצב גיבוי
+        raise Exception("Secrets not found")
+except Exception:
+    # אם אנחנו מריצים מקומית על המחשב שלך ב-PyCharm
+    KEY_FILE = "clinical-trials-project-495405-ef2da931c162.json"
+    client = bigquery.Client.from_service_account_json(KEY_FILE)
 
 # --- תפריט צד ---
 st.sidebar.header("סינון לפי נושא")
